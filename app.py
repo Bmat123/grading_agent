@@ -1,3 +1,4 @@
+import time
 import streamlit as st
 from tools import extract_text_from_file
 from agent import grade_essay
@@ -44,6 +45,8 @@ has_criteria = (criteria_text_input and criteria_text_input.strip()) or criteria
 if has_criteria and essay_file:
     if st.button("Grade Essay", type="primary", use_container_width=True):
         with st.spinner("Grading in progress — the agent is reading, evaluating, and verifying bibliography. This may take a few minutes..."):
+            start_time = time.time()
+
             if criteria_text_input and criteria_text_input.strip():
                 criteria_text = criteria_text_input.strip()
             else:
@@ -58,6 +61,13 @@ if has_criteria and essay_file:
                 st.stop()
 
             result = grade_essay(criteria_text, essay_text)
+            elapsed = time.time() - start_time
+
+        minutes, seconds = divmod(int(elapsed), 60)
+        if minutes > 0:
+            st.caption(f"Grading completed in {minutes}m {seconds}s")
+        else:
+            st.caption(f"Grading completed in {seconds}s")
 
         if result.get("parse_error"):
             st.warning("The agent returned a non-structured response. Showing raw output:")
